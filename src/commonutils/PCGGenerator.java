@@ -21,12 +21,21 @@ public class PCGGenerator extends Random
     final private long inc;
     private long state;
 
+    /**
+     * Initialize a RNG with the passed seed and default increment
+     * @param seed the initial seed of the RNG
+     */
     public PCGGenerator(long seed)
     {
         this.state = seed;
         inc=1;
     }
 
+    /**
+     * Initialize a RNG with the passed seed and increment
+     * @param seed the initial seed of the RNG
+     * @param initseq the increment to calculate the next random number
+     */
     public PCGGenerator(long seed, long initseq)
     {
         // initseq selects the output sequence for the RNG
@@ -34,6 +43,11 @@ public class PCGGenerator extends Random
         this.inc=initseq;
     }
 
+    /**
+     * Give the next random number in the sequence
+     * @param nbits unused at the moment
+     * @return the next random number using the PCG algorithm
+     */
     @Override
     protected int next(int nbits)
     {

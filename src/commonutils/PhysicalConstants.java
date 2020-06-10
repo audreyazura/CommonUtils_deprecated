@@ -19,7 +19,7 @@ package commonutils;
 import java.math.BigDecimal;
 
 /**
- *
+ * Contains different physical constants useful for calculations as well as a list of different unit order of magnitude names
  * @author Alban Lafuente
  */
 public class PhysicalConstants
@@ -33,7 +33,10 @@ public class PhysicalConstants
     //definition of the electronVolt in J
     static final public BigDecimal EV = new BigDecimal("1.602176634e-19");
     
-    //contains the possible units multiplier
+    /**
+     * lists the different unit prefixes and their multiplier in SI
+     * the UNITY prefix is there to represent "pure" SI units, such as m, s, g...
+     */
     static public enum UnitsPrefix
     {
         FEMTO ("1e-12", "f"),  //[SI unit]/[FEMTO unit]
@@ -62,6 +65,11 @@ public class PhysicalConstants
             return m_textPrefix;
         }
         
+        /**
+         * Select the correct unit prefix for a given passed unit
+         * @param p_unit the passed unit (e.g., nm, fs...)
+         * @return the correct unit prefix
+         */
         static public PhysicalConstants.UnitsPrefix selectPrefix (String p_unit)
         {
             PhysicalConstants.UnitsPrefix prefixSelected;
