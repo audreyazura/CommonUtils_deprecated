@@ -13,12 +13,12 @@ package commonutils;
 import java.util.Random;
 
 /**
- *
+ * 
  * @author Wilfried Elmenreich
  */
 public class PCGGenerator extends Random
 {
-    private long inc;
+    final private long inc;
     private long state;
 
     public PCGGenerator(long seed)
@@ -34,6 +34,7 @@ public class PCGGenerator extends Random
         this.inc=initseq;
     }
 
+    @Override
     protected int next(int nbits)
     {
         long oldstate=state;
