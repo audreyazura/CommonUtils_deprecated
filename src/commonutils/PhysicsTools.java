@@ -19,12 +19,13 @@
 package commonutils;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
 /**
  * Contains different physical constants useful for calculations as well as a list of different unit order of magnitude names
  * @author Alban Lafuente
  */
-public class PhysicalConstants
+public class PhysicsTools
 {
     //Boltzman constant in J/K
     static final public BigDecimal KB = new BigDecimal("1.380649e-23");
@@ -51,7 +52,7 @@ public class PhysicalConstants
         private final BigDecimal m_multiplier;
         private final String m_textPrefix;
 
-        UnitsPrefix(String p_multiplier, String p_prefix)
+        private UnitsPrefix(String p_multiplier, String p_prefix)
         {
             m_multiplier = new BigDecimal(p_multiplier);
             m_textPrefix = new String(p_prefix);
@@ -72,33 +73,58 @@ public class PhysicalConstants
          * @param p_unit the passed unit (e.g., nm, fs...)
          * @return the correct unit prefix
          */
-        static public PhysicalConstants.UnitsPrefix selectPrefix (String p_unit)
+        static public PhysicsTools.UnitsPrefix selectPrefix (String p_unit)
         {
-            PhysicalConstants.UnitsPrefix prefixSelected;
+            PhysicsTools.UnitsPrefix prefixSelected;
 
             switch (p_unit.charAt(0))
             {
                 case 'f':
-                    prefixSelected = PhysicalConstants.UnitsPrefix.FEMTO;
+                    prefixSelected = PhysicsTools.UnitsPrefix.FEMTO;
                     break;
                 case 'n':
-                    prefixSelected = PhysicalConstants.UnitsPrefix.NANO;
+                    prefixSelected = PhysicsTools.UnitsPrefix.NANO;
                     break;
                 case 'μ':
-                    prefixSelected = PhysicalConstants.UnitsPrefix.MICRO;
+                    prefixSelected = PhysicsTools.UnitsPrefix.MICRO;
                     break;
                 case 'm':
-                    prefixSelected = PhysicalConstants.UnitsPrefix.MILLI;
+                    prefixSelected = PhysicsTools.UnitsPrefix.MILLI;
                     break;
                 case 'c':
-                    prefixSelected = PhysicalConstants.UnitsPrefix.CENTI;
+                    prefixSelected = PhysicsTools.UnitsPrefix.CENTI;
                     break;
                 default:
-                    prefixSelected = PhysicalConstants.UnitsPrefix.UNITY;
+                    prefixSelected = PhysicsTools.UnitsPrefix.UNITY;
                     break;
             }
 
             return prefixSelected;
+        }
+    }
+    
+    //effective masses are given has a multiplier of the electron mass
+    static public enum Materials
+    {
+        CIGS("0.089", "0.693");
+        
+        private final BigDecimal m_electronEffectiveMass;
+        private final BigDecimal m_holeEffectiveMass;
+        
+        private Materials(String p_electronEffectiveMass, String p_holeEffectiveMass)
+        {
+            m_electronEffectiveMass = new BigDecimal(p_electronEffectiveMass);
+            m_holeEffectiveMass = new BigDecimal(p_holeEffectiveMass);
+        }
+        
+        public BigDecimal getElectronEffectiveMass()
+        {
+            return m_electronEffectiveMass;
+        }
+        
+        public BigDecimal getHoleEffectiveMass()
+        {
+            return m_holeEffectiveMass;
         }
     }
 }
