@@ -128,7 +128,7 @@ public class PhysicsTools
             return m_holeEffectiveMass;
         }
         
-        public Materials getMaterialFromString(String p_materialName)
+        static public Materials getMaterialFromString(String p_materialName)
         {
             Materials selectedMaterial;
             
