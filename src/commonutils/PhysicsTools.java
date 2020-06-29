@@ -73,29 +73,29 @@ public class PhysicsTools
          * @param p_unit the passed unit (e.g., nm, fs...)
          * @return the correct unit prefix
          */
-        static public PhysicsTools.UnitsPrefix selectPrefix (String p_unit)
+        static public UnitsPrefix selectPrefix (String p_unit)
         {
-            PhysicsTools.UnitsPrefix prefixSelected;
+            UnitsPrefix prefixSelected;
 
             switch (p_unit.charAt(0))
             {
                 case 'f':
-                    prefixSelected = PhysicsTools.UnitsPrefix.FEMTO;
+                    prefixSelected = FEMTO;
                     break;
                 case 'n':
-                    prefixSelected = PhysicsTools.UnitsPrefix.NANO;
+                    prefixSelected = NANO;
                     break;
                 case 'μ':
-                    prefixSelected = PhysicsTools.UnitsPrefix.MICRO;
+                    prefixSelected = MICRO;
                     break;
                 case 'm':
-                    prefixSelected = PhysicsTools.UnitsPrefix.MILLI;
+                    prefixSelected = MILLI;
                     break;
                 case 'c':
-                    prefixSelected = PhysicsTools.UnitsPrefix.CENTI;
+                    prefixSelected = CENTI;
                     break;
                 default:
-                    prefixSelected = PhysicsTools.UnitsPrefix.UNITY;
+                    prefixSelected = UNITY;
                     break;
             }
 
@@ -106,7 +106,8 @@ public class PhysicsTools
     //effective masses are given has a multiplier of the electron mass
     static public enum Materials
     {
-        CIGS("0.089", "0.693");
+        CIGS("0.089", "0.693"),
+        VACUUM("1", "1");
         
         private final BigDecimal m_electronEffectiveMass;
         private final BigDecimal m_holeEffectiveMass;
@@ -125,6 +126,23 @@ public class PhysicsTools
         public BigDecimal getHoleEffectiveMass()
         {
             return m_holeEffectiveMass;
+        }
+        
+        public Materials getMaterialFromString(String p_materialName)
+        {
+            Materials selectedMaterial;
+            
+            switch (p_materialName)
+            {
+                case "CIGS":
+                    selectedMaterial = CIGS;
+                    break;
+                default:
+                    selectedMaterial = VACUUM;
+                    break;
+            }
+            
+            return selectedMaterial;
         }
     }
 }
