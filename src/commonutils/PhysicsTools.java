@@ -19,7 +19,6 @@
 package commonutils;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 
 /**
  * Contains different physical constants useful for calculations as well as a list of different unit order of magnitude names
