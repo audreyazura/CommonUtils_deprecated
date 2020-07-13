@@ -180,7 +180,7 @@ public class ContinuousFunction
         {
             for (BigDecimal position: m_abscissa)
             {
-                addedValues.put(position, m_values.get(position).add(p_passedFunction.getValues().get(position)));
+                addedValues.put(position, formatBigDecimal(m_values.get(position).add(p_passedFunction.getValues().get(position))));
             }
         }
         else
@@ -189,7 +189,7 @@ public class ContinuousFunction
             {
                 try
                 {
-                    addedValues.put(position, m_values.get(position).add(p_passedFunction.getValueAtPosition(position)));
+                    addedValues.put(position, formatBigDecimal(m_values.get(position).add(p_passedFunction.getValueAtPosition(position))));
                 }
                 catch (NoSuchElementException ex)
                 {
@@ -199,6 +199,81 @@ public class ContinuousFunction
         }
         
         return new ContinuousFunction((HashMap) addedValues);
+    }
+    
+    public ContinuousFunction negate()
+    {
+        Map<BigDecimal, BigDecimal> negatedFunction = new HashMap<>();
+        
+        for (BigDecimal position: m_abscissa)
+        {
+            negatedFunction.put(position, m_values.get(position).negate());
+        }
+        
+        return new ContinuousFunction((HashMap) negatedFunction);
+    }
+    
+    public ContinuousFunction substract(ContinuousFunction p_passedFunction)
+    {
+        return this.add(p_passedFunction.negate());
+    }
+    
+    public ContinuousFunction multiply(ContinuousFunction p_passedFunction)
+    {
+        Map<BigDecimal, BigDecimal> multilpliedValues = new HashMap<>();
+        
+        if (m_abscissa.equals(p_passedFunction.getAbscissa()))
+        {
+            for (BigDecimal position: m_abscissa)
+            {
+                multilpliedValues.put(position, formatBigDecimal(m_values.get(position).multiply(p_passedFunction.getValues().get(position))));
+            }
+        }
+        else
+        {
+            for (BigDecimal position: m_abscissa)
+            {
+                try
+                {
+                    multilpliedValues.put(position, formatBigDecimal(m_values.get(position).multiply(p_passedFunction.getValueAtPosition(position))));
+                }
+                catch (NoSuchElementException ex)
+                {
+                    multilpliedValues.put(position, m_values.get(position));
+                }
+            }
+        }
+        
+        return new ContinuousFunction((HashMap) multilpliedValues);
+    }
+    
+    public ContinuousFunction multiply(BigDecimal p_multiplier)
+    {
+        Map<BigDecimal, BigDecimal> multilpliedValues = new HashMap<>();
+        
+        for (BigDecimal position: m_abscissa)
+        {
+            multilpliedValues.put(position, formatBigDecimal(m_values.get(position).multiply(p_multiplier)));
+        }
+        
+        return new ContinuousFunction((HashMap) multilpliedValues);
+    }
+    
+    public ContinuousFunction invert() throws ArithmeticException
+    {
+        Map<BigDecimal, BigDecimal> invertedFunction = new HashMap<>();
+        
+        for (BigDecimal position: m_abscissa)
+        {
+            invertedFunction.put(position, BigDecimal.ONE.divide(m_values.get(position), MathContext.DECIMAL128));
+        }
+        
+        return new ContinuousFunction((HashMap) invertedFunction);
+    }
+    
+    public ContinuousFunction divide(ContinuousFunction p_passedFunction) throws ArithmeticException
+    {
+        return this.multiply(p_passedFunction.invert());
     }
             
     /**
