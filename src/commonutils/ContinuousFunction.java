@@ -275,6 +275,11 @@ public class ContinuousFunction
     {
         return this.multiply(p_passedFunction.invert());
     }
+    
+    public ContinuousFunction divide(BigDecimal p_divider) throws ArithmeticException
+    {
+        return this.multiply(BigDecimal.ONE.divide(p_divider, MathContext.DECIMAL128));
+    }
             
     /**
      * Give the value of the continuous function at the given position
