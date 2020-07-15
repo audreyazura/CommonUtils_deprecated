@@ -143,10 +143,11 @@ public class ContinuousFunction
     public String toString()
     {
         String result = "";
+        Set<BigDecimal> abscissa = new TreeSet(m_values.keySet());
         
-        for (BigDecimal abscissa: m_values.keySet())
+        for (BigDecimal currentAbscissa: abscissa)
         {
-            result = result.concat(abscissa+"\t=> "+m_values.get(abscissa)+"\n");
+            result = result.concat(currentAbscissa+"\t=> "+m_values.get(currentAbscissa)+"\n");
         }
         
         return result;
