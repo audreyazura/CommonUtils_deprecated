@@ -40,25 +40,21 @@ import java.util.zip.DataFormatException;
 public class ContinuousFunction
 {
     //do not truncate values here: the field is also defined outside the absorber. Only the absorber knows if a particle exited itself. A ContinuousFunction can only say if a given position is in its range.
-    protected final Set<BigDecimal> m_abscissa;
     protected final Map<BigDecimal, BigDecimal> m_values;
     
     public ContinuousFunction()
     {
-        m_abscissa = new TreeSet<>();
         m_values = new HashMap<>();
     }
     
     public ContinuousFunction (ContinuousFunction p_passedFunction)
     {
-        m_values = p_passedFunction.getValues();
-        m_abscissa = new TreeSet(m_values.keySet());
+        m_values = p_passedFunction.getFunction();
         
     }
     
     public ContinuousFunction (HashMap<BigDecimal, BigDecimal> p_values)
     {
-        m_abscissa = new TreeSet(p_values.keySet());
         m_values = p_values;
     }
     
@@ -106,8 +102,6 @@ public class ContinuousFunction
                 }
 	    }
         }
-        
-        m_abscissa = new TreeSet(m_values.keySet());
     }
     
     /**
@@ -117,7 +111,8 @@ public class ContinuousFunction
      */
     private boolean isInRange(BigDecimal p_position)
     {
-        return p_position.compareTo(((TreeSet<BigDecimal>) m_abscissa).first()) >= 0 && p_position.compareTo(((TreeSet<BigDecimal>) m_abscissa).last()) <= 0;
+        Set<BigDecimal> definedRange = new TreeSet(m_values.keySet());
+        return p_position.compareTo(((TreeSet<BigDecimal>) definedRange).first()) >= 0 && p_position.compareTo(((TreeSet<BigDecimal>) definedRange).last()) <= 0;
     }
     
     protected BigDecimal formatBigDecimal(BigDecimal p_toBeFormatted)
@@ -132,7 +127,7 @@ public class ContinuousFunction
         
         if (result)
         {
-            result = m_values.equals(((ContinuousFunction) o).getValues());
+            result = m_values.equals(((ContinuousFunction) o).getFunction());
         }
         
         return result;
@@ -149,7 +144,7 @@ public class ContinuousFunction
     {
         String result = "";
         
-        for (BigDecimal abscissa: m_abscissa)
+        for (BigDecimal abscissa: m_values.keySet())
         {
             result = result.concat(abscissa+"\t=> "+m_values.get(abscissa)+"\n");
         }
@@ -159,10 +154,10 @@ public class ContinuousFunction
     
     public TreeSet<BigDecimal> getAbscissa()
     {
-        return new TreeSet(m_abscissa);
+        return new TreeSet(m_values.keySet());
     }
     
-    public HashMap<BigDecimal, BigDecimal> getValues()
+    public HashMap<BigDecimal, BigDecimal> getFunction()
     {
         return new HashMap(m_values);
     }
@@ -175,17 +170,18 @@ public class ContinuousFunction
     public ContinuousFunction add(ContinuousFunction p_passedFunction)
     {
         Map<BigDecimal, BigDecimal> addedValues = new HashMap<>();
+        Set<BigDecimal> abscissa = new TreeSet(m_values.keySet());
         
-        if (m_abscissa.equals(p_passedFunction.getAbscissa()))
+        if (abscissa.equals(p_passedFunction.getAbscissa()))
         {
-            for (BigDecimal position: m_abscissa)
+            for (BigDecimal position: abscissa)
             {
-                addedValues.put(position, formatBigDecimal(m_values.get(position).add(p_passedFunction.getValues().get(position))));
+                addedValues.put(position, formatBigDecimal(m_values.get(position).add(p_passedFunction.getFunction().get(position))));
             }
         }
         else
         {
-            for (BigDecimal position: m_abscissa)
+            for (BigDecimal position: abscissa)
             {
                 try
                 {
@@ -204,8 +200,9 @@ public class ContinuousFunction
     public ContinuousFunction negate()
     {
         Map<BigDecimal, BigDecimal> negatedFunction = new HashMap<>();
+        Set<BigDecimal> abscissa = new TreeSet(m_values.keySet());
         
-        for (BigDecimal position: m_abscissa)
+        for (BigDecimal position: abscissa)
         {
             negatedFunction.put(position, m_values.get(position).negate());
         }
@@ -221,17 +218,18 @@ public class ContinuousFunction
     public ContinuousFunction multiply(ContinuousFunction p_passedFunction)
     {
         Map<BigDecimal, BigDecimal> multilpliedValues = new HashMap<>();
+        Set<BigDecimal> abscissa = new TreeSet(m_values.keySet());
         
-        if (m_abscissa.equals(p_passedFunction.getAbscissa()))
+        if (abscissa.equals(p_passedFunction.getAbscissa()))
         {
-            for (BigDecimal position: m_abscissa)
+            for (BigDecimal position: abscissa)
             {
-                multilpliedValues.put(position, formatBigDecimal(m_values.get(position).multiply(p_passedFunction.getValues().get(position))));
+                multilpliedValues.put(position, formatBigDecimal(m_values.get(position).multiply(p_passedFunction.getFunction().get(position))));
             }
         }
         else
         {
-            for (BigDecimal position: m_abscissa)
+            for (BigDecimal position: abscissa)
             {
                 try
                 {
@@ -250,8 +248,9 @@ public class ContinuousFunction
     public ContinuousFunction multiply(BigDecimal p_multiplier)
     {
         Map<BigDecimal, BigDecimal> multilpliedValues = new HashMap<>();
+        Set<BigDecimal> abscissa = new TreeSet(m_values.keySet());
         
-        for (BigDecimal position: m_abscissa)
+        for (BigDecimal position: abscissa)
         {
             multilpliedValues.put(position, formatBigDecimal(m_values.get(position).multiply(p_multiplier)));
         }
@@ -262,8 +261,9 @@ public class ContinuousFunction
     public ContinuousFunction invert() throws ArithmeticException
     {
         Map<BigDecimal, BigDecimal> invertedFunction = new HashMap<>();
+        Set<BigDecimal> abscissa = new TreeSet(m_values.keySet());
         
-        for (BigDecimal position: m_abscissa)
+        for (BigDecimal position: abscissa)
         {
             invertedFunction.put(position, BigDecimal.ONE.divide(m_values.get(position), MathContext.DECIMAL128));
         }
@@ -290,17 +290,18 @@ public class ContinuousFunction
     public BigDecimal getValueAtPosition(BigDecimal position)
     {
         BigDecimal value;
+        Set<BigDecimal> abscissa = new TreeSet(m_values.keySet());
         
         if (isInRange(position))
         {
-            if (m_abscissa.contains(position))
+            if (abscissa.contains(position))
             {
                 value = m_values.get(position);
             }
             else
             {
-                BigDecimal previousPosition = ((TreeSet<BigDecimal>) m_abscissa).lower(position);
-                BigDecimal nextPosition = ((TreeSet<BigDecimal>) m_abscissa).higher(position);
+                BigDecimal previousPosition = ((TreeSet<BigDecimal>) abscissa).lower(position);
+                BigDecimal nextPosition = ((TreeSet<BigDecimal>) abscissa).higher(position);
                 
                 BigDecimal interpolationSlope = (m_values.get(nextPosition).subtract(m_values.get(previousPosition))).divide(nextPosition.subtract(previousPosition), MathContext.DECIMAL128);
                 BigDecimal interpolationOffset = m_values.get(previousPosition).subtract(interpolationSlope.multiply(previousPosition));
