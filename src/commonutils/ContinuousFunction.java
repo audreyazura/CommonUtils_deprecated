@@ -94,9 +94,8 @@ public class ContinuousFunction
 	    {
 		//we put the abscissa in meter in order to do all calculations in SI
                 BigDecimal currentAbscissa = formatBigDecimal((new BigDecimal(lineSplit[p_columnToExtract[0]].strip())).multiply(p_abscissaUnitMultiplier));
-                Set<BigDecimal> abscissaSet = new TreeSet(m_values.keySet());
                 
-                if (!abscissaSet.contains(currentAbscissa))
+                if (!m_values.keySet().contains(currentAbscissa))
                 {
                     m_values.put(currentAbscissa, formatBigDecimal((new BigDecimal(lineSplit[p_columnToExtract[1]].strip())).divide(p_valuesUnitMultiplier, MathContext.DECIMAL128)));
                 }
