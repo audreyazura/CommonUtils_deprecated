@@ -71,7 +71,7 @@ public class ContinuousFunction
      * @throws ArrayIndexOutOfBoundsException
      * @throws IOException 
      */
-    protected ContinuousFunction (File p_inputFile, BigDecimal p_abscissaUnitMultiplier, BigDecimal p_valuesUnitMultiplier, String p_expectedExtension, int p_ncolumn, int[] p_columnToExtract) throws FileNotFoundException, DataFormatException, ArrayIndexOutOfBoundsException, IOException
+    protected ContinuousFunction (File p_inputFile, BigDecimal p_abscissaUnitMultiplier, BigDecimal p_valuesUnitMultiplier, String p_expectedExtension, String p_separator, int p_ncolumn, int[] p_columnToExtract) throws FileNotFoundException, DataFormatException, ArrayIndexOutOfBoundsException, IOException
     {
         m_values = new HashMap<>();
         
@@ -88,7 +88,7 @@ public class ContinuousFunction
 	String line;
 	while (((line = fieldFile.readLine()) != null))
 	{	    
-	    String[] lineSplit = line.strip().split("\t");
+	    String[] lineSplit = line.strip().split(p_separator);
 	    
 	    if(lineSplit.length == p_ncolumn && numberRegex.matcher(lineSplit[0]).matches())
 	    {
