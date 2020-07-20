@@ -100,7 +100,7 @@ public class ContinuousFunction
                 
                 if (!m_values.keySet().contains(currentAbscissa))
                 {
-                    m_values.put(currentAbscissa, formatBigDecimal((new BigDecimal(lineSplit[p_columnToExtract[1]].strip())).divide(p_valuesUnitMultiplier, MathContext.DECIMAL128)));
+                    m_values.put(currentAbscissa, formatBigDecimal((new BigDecimal(lineSplit[p_columnToExtract[1]].strip())).multiply(p_valuesUnitMultiplier)));
                 }
 	    }
         }
