@@ -22,8 +22,11 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.MathContext;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -252,7 +255,7 @@ public class ContinuousFunction
         
         for (BigDecimal position: abscissa)
         {
-            multilpliedValues.put(position, formatBigDecimal(m_values.get(position).multiply(p_multiplier)));
+            multilpliedValues.put(position, formatBigDecimal(getValueAtPosition(position).multiply(p_multiplier)));
         }
         
         return new ContinuousFunction((HashMap) multilpliedValues);
@@ -265,7 +268,7 @@ public class ContinuousFunction
         
         for (BigDecimal position: abscissa)
         {
-            invertedFunction.put(position, BigDecimal.ONE.divide(m_values.get(position), MathContext.DECIMAL128));
+            invertedFunction.put(position, BigDecimal.ONE.divide(getValueAtPosition(position), MathContext.DECIMAL128));
         }
         
         return new ContinuousFunction((HashMap) invertedFunction);
@@ -279,6 +282,81 @@ public class ContinuousFunction
     public ContinuousFunction divide(BigDecimal p_divider) throws ArithmeticException
     {
         return this.multiply(BigDecimal.ONE.divide(p_divider, MathContext.DECIMAL128));
+    }
+    
+    public ContinuousFunction avoidZeros()
+    {
+        Map<BigDecimal, BigDecimal> noZeroFunction = new HashMap();
+        List<BigDecimal> abscissa = new ArrayList(m_values.keySet());
+        BigDecimal next, previous, currentValue, currentAbscissa;                
+        int lastIndex = abscissa.size()-1;
+        
+        /*
+        if there is only one point in the function (why would you do that?)
+        we test if the only element is zero and put in a positive DOUBLE_MIN_VALUE in if it is
+        */
+        if (lastIndex == 0)
+        {
+            currentAbscissa = abscissa.get(0);
+            currentValue = m_values.get(currentAbscissa);
+            
+            if (currentValue.compareTo(BigDecimal.ZERO) == 0)
+            {
+                noZeroFunction.put(currentAbscissa, new BigDecimal(Double.MIN_VALUE));
+            }
+            else
+            {
+                noZeroFunction.put(currentAbscissa, currentValue);
+            }
+        }
+        /*
+        Otherwise we loop on all element, testing each of them to be zero
+        If they are, we put instead DOUBLE_MIN_VALUE in, with a sign given by the environment
+        */
+        else
+        {
+            for(int i = 0 ; i <= lastIndex ; i += 1)
+            {
+                currentAbscissa = abscissa.get(i);
+                currentValue = m_values.get(currentAbscissa);
+
+                if (currentValue.compareTo(BigDecimal.ZERO) == 0)
+                {
+                    if (i == lastIndex)
+                    {
+                        noZeroFunction.put(currentAbscissa, new BigDecimal(m_values.get(abscissa.get(i-1)).signum() * Double.MIN_VALUE));
+                    }
+                    else
+                    {
+                        next = m_values.get(abscissa.get(i+1));
+                        
+                        if (i == 0)
+                        {
+                            noZeroFunction.put(currentAbscissa, new BigDecimal(next.signum() * Double.MIN_VALUE));
+                        }
+                        else
+                        {
+                            previous = noZeroFunction.get(abscissa.get(i-1));
+                            
+                            if (currentValue.subtract(next).abs().compareTo(currentValue.subtract(previous).abs()) > 0)
+                            {
+                                noZeroFunction.put(currentAbscissa, new BigDecimal(previous.signum() * Double.MIN_VALUE));
+                            }
+                            else 
+                            {
+                                noZeroFunction.put(currentAbscissa, new BigDecimal(next.signum() * Double.MIN_VALUE));
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    noZeroFunction.put(currentAbscissa, currentValue);
+                }
+            }
+        }
+        
+        return new ContinuousFunction((HashMap) noZeroFunction);
     }
             
     /**
