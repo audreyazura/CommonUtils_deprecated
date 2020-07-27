@@ -169,7 +169,7 @@ public class ContinuousFunction
      * @param p_passedFunction the function to be added.
      * @return 
      */
-    public ContinuousFunction add(ContinuousFunction p_passedFunction) throws NoSuchElementException
+    public ContinuousFunction add(ContinuousFunction p_passedFunction)
     {
         Map<BigDecimal, BigDecimal> addedValues = new HashMap<>();
         Set<BigDecimal> abscissa = new TreeSet(m_values.keySet());
@@ -217,7 +217,7 @@ public class ContinuousFunction
         return this.add(p_passedFunction.negate());
     }
     
-    public ContinuousFunction multiply(ContinuousFunction p_passedFunction) throws NoSuchElementException
+    public ContinuousFunction multiply(ContinuousFunction p_passedFunction)
     {
         Map<BigDecimal, BigDecimal> multilpliedValues = new HashMap<>();
         Set<BigDecimal> abscissa = new TreeSet(m_values.keySet());
