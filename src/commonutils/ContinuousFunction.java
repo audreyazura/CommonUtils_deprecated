@@ -22,7 +22,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -170,7 +169,7 @@ public class ContinuousFunction
      * @param p_passedFunction the function to be added.
      * @return 
      */
-    public ContinuousFunction add(ContinuousFunction p_passedFunction)
+    public ContinuousFunction add(ContinuousFunction p_passedFunction) throws NoSuchElementException
     {
         Map<BigDecimal, BigDecimal> addedValues = new HashMap<>();
         Set<BigDecimal> abscissa = new TreeSet(m_values.keySet());
@@ -218,7 +217,7 @@ public class ContinuousFunction
         return this.add(p_passedFunction.negate());
     }
     
-    public ContinuousFunction multiply(ContinuousFunction p_passedFunction)
+    public ContinuousFunction multiply(ContinuousFunction p_passedFunction) throws NoSuchElementException
     {
         Map<BigDecimal, BigDecimal> multilpliedValues = new HashMap<>();
         Set<BigDecimal> abscissa = new TreeSet(m_values.keySet());
