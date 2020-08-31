@@ -33,6 +33,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 import java.util.zip.DataFormatException;
+import org.ojalgo.matrix.RationalMatrix;
 
 /**
  * Represents a continuous function as an ensemble of value associated with an abscissa
@@ -42,7 +43,7 @@ import java.util.zip.DataFormatException;
 public class ContinuousFunction
 {
     //do not truncate values here: the field is also defined outside the absorber. Only the absorber knows if a particle exited itself. A ContinuousFunction can only say if a given position is in its range.
-    protected final Map<BigDecimal, BigDecimal> m_values;
+    protected final RationalMatrix m_coefficient;
     
     public ContinuousFunction()
     {
