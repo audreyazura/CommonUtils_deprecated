@@ -34,6 +34,7 @@ import java.util.TreeSet;
 import java.util.regex.Pattern;
 import java.util.zip.DataFormatException;
 import org.ojalgo.matrix.RationalMatrix;
+import org.ojalgo.scalar.RationalNumber;
 
 /**
  * Represents a continuous function as an ensemble of value associated with an abscissa
@@ -43,22 +44,28 @@ import org.ojalgo.matrix.RationalMatrix;
 public class ContinuousFunction
 {
     //do not truncate values here: the field is also defined outside the absorber. Only the absorber knows if a particle exited itself. A ContinuousFunction can only say if a given position is in its range.
-    protected final RationalMatrix m_coefficient;
+    protected final ArrayList<BigDecimal> m_coefficient;
+    private final HashMap<String, BigDecimal> m_limits = new HashMap();
     
-    public ContinuousFunction()
-    {
-        m_values = new HashMap<>();
-    }
+//    public ContinuousFunction()
+//    {
+//        m_values = new HashMap<>();
+//    }
     
     public ContinuousFunction (ContinuousFunction p_passedFunction)
     {
-        m_values = p_passedFunction.getFunction();
+        m_coefficient = p_passedFunction.getFunction();
         
+        m_limits.put("min", p_passedFunction.getMin());
+        m_limits.put("max", p_passedFunction.getMax());
     }
     
-    public ContinuousFunction (HashMap<BigDecimal, BigDecimal> p_values)
+    public ContinuousFunction (List<BigDecimal> p_coef, BigDecimal p_min, BigDecimal p_max)
     {
-        m_values = p_values;
+        m_coefficient = new ArrayList(p_coef);
+        
+        m_limits.put("max", p_max);
+        m_limits.put("min", p_min);
     }
     
     /**
@@ -76,8 +83,6 @@ public class ContinuousFunction
      */
     protected ContinuousFunction (File p_inputFile, BigDecimal p_abscissaUnitMultiplier, BigDecimal p_valuesUnitMultiplier, String p_expectedExtension, String p_separator, int p_ncolumn, int[] p_columnToExtract) throws FileNotFoundException, DataFormatException, ArrayIndexOutOfBoundsException, IOException
     {
-        m_values = new HashMap<>();
-        
         String[] nameSplit = p_inputFile.getPath().split("\\.");
         
         if (!nameSplit[nameSplit.length-1].equals(p_expectedExtension))
@@ -87,6 +92,9 @@ public class ContinuousFunction
         
         BufferedReader fieldFile = new BufferedReader(new FileReader(p_inputFile));
         Pattern numberRegex = Pattern.compile("^\\-?\\d+(\\.\\d+(e(\\+|\\-)\\d+)?)?");
+        
+        List<BigDecimal> abscissa = new ArrayList();
+        List<BigDecimal> valueArray = new ArrayList();
 	
 	String line;
 	while (((line = fieldFile.readLine()) != null))
@@ -95,15 +103,48 @@ public class ContinuousFunction
 	    
 	    if(lineSplit.length == p_ncolumn && numberRegex.matcher(lineSplit[0]).matches())
 	    {
-		//we put the abscissa in meter in order to do all calculations in SI
+		//we put the abscissa in SI unit
                 BigDecimal currentAbscissa = formatBigDecimal((new BigDecimal(lineSplit[p_columnToExtract[0]].strip())).multiply(p_abscissaUnitMultiplier));
                 
-                if (!m_values.keySet().contains(currentAbscissa))
+                //we save the abscissa and the value if and only if the abscissa is not already in the array: a continuous function can't have the same abscissa for two values
+                if (!abscissa.contains(currentAbscissa))
                 {
-                    m_values.put(currentAbscissa, formatBigDecimal((new BigDecimal(lineSplit[p_columnToExtract[1]].strip())).multiply(p_valuesUnitMultiplier)));
+                    abscissa.add(currentAbscissa);
+                    //the value is also put in SI unit before stocking it
+                    valueArray.add(formatBigDecimal((new BigDecimal(lineSplit[p_columnToExtract[1]].strip())).multiply(p_valuesUnitMultiplier)));
                 }
 	    }
         }
+        
+        //we create the amtrix to calculate the coefficient
+        RationalMatrix value = RationalMatrix.FACTORY.columns(valueArray);
+        
+        int matrixSize = abscissa.size();
+        RationalMatrix.DenseReceiver multipliedAbscissaMatrixBuilder = RationalMatrix.FACTORY.makeDense(matrixSize, matrixSize);
+        
+        for(int i = 0 ; i < matrixSize ; i += 1)
+        {
+            for(int j = 1 ; j <= matrixSize ; j += 1)
+            {
+                multipliedAbscissaMatrixBuilder.set(i, j-1, abscissa.get(i).pow(matrixSize-j));
+            }
+        }
+        
+        //And the coeficient can be calculated
+        RationalMatrix coefficients = multipliedAbscissaMatrixBuilder.get().solve(value);
+        
+        m_coefficient = new ArrayList();
+        if(coefficients.countColumns() == 1)
+        {
+            for(int i = (int) coefficients.countRows()-1 ; i >= 0  ; i -= 1)
+            {
+                m_coefficient.add(coefficients.get(i,0).toBigDecimal());
+            }
+        }
+        
+        //The min and max of the function are the first and last elements of abscissa
+        m_limits.put("min", abscissa.get(0));
+        m_limits.put("max", abscissa.get(matrixSize-1));
     }
     
     /**
@@ -113,8 +154,7 @@ public class ContinuousFunction
      */
     private boolean isInRange(BigDecimal p_position)
     {
-        Set<BigDecimal> definedRange = new TreeSet(m_values.keySet());
-        return p_position.compareTo(((TreeSet<BigDecimal>) definedRange).first()) >= 0 && p_position.compareTo(((TreeSet<BigDecimal>) definedRange).last()) <= 0;
+        return p_position.compareTo(m_limits.get("min")) >= 0 && p_position.compareTo(m_limits.get("max")) <= 0;
     }
     
     protected BigDecimal formatBigDecimal(BigDecimal p_toBeFormatted)
@@ -129,7 +169,7 @@ public class ContinuousFunction
         
         if (result)
         {
-            result = m_values.equals(((ContinuousFunction) o).getFunction());
+            result = m_coefficient.equals(((ContinuousFunction) o).getFunction());
         }
         
         return result;
@@ -138,31 +178,54 @@ public class ContinuousFunction
     @Override
     public int hashCode()
     {
-        return Objects.hash(m_values);
+        return Objects.hash(m_coefficient);
     }
     
     @Override
     public String toString()
     {
         String result = "";
-        Set<BigDecimal> abscissa = new TreeSet(m_values.keySet());
         
-        for (BigDecimal currentAbscissa: abscissa)
+        for (int i = m_coefficient.size()-1 ; i > 0 ; i += 1)
         {
-            result = result.concat(currentAbscissa+"\t=> "+m_values.get(currentAbscissa)+"\n");
+            result = result.concat(m_coefficient.get(i) + "x^" + i + " + ");
         }
         
-        return result;
+        return result + m_coefficient.get(0);
     }
     
     public TreeSet<BigDecimal> getAbscissa()
     {
-        return new TreeSet(m_values.keySet());
+        Set<BigDecimal> abscissa = new TreeSet();
+        BigDecimal min = m_limits.get("min");
+        BigDecimal max = m_limits.get("max");
+        
+        BigDecimal incr = (max.subtract(min)).divide(new BigDecimal("1000"));
+        
+        abscissa.add(min);
+        abscissa.add(max);
+        
+        for(BigDecimal n = min.add(incr) ; n.compareTo(max) < 0 ; n.add(incr))
+        {
+            abscissa.add(n);
+        }
+        
+        return (TreeSet<BigDecimal>) abscissa;
     }
     
-    public HashMap<BigDecimal, BigDecimal> getFunction()
+    public ArrayList<BigDecimal> getFunction()
     {
-        return new HashMap(m_values);
+        return new ArrayList(m_coefficient);
+    }
+    
+    public BigDecimal getMin()
+    {
+        return m_limits.get("min");
+    }
+    
+    public BigDecimal getMax()
+    {
+        return m_limits.get("max");
     }
     
     /**
@@ -172,32 +235,26 @@ public class ContinuousFunction
      */
     public ContinuousFunction add(ContinuousFunction p_passedFunction)
     {
-        Map<BigDecimal, BigDecimal> addedValues = new HashMap<>();
-        Set<BigDecimal> abscissa = new TreeSet(m_values.keySet());
+        List<BigDecimal> passedCoef = p_passedFunction.getFunction();
+        List<BigDecimal> currentCoef = new ArrayList(m_coefficient);
+        List<BigDecimal> finalCoefs = new ArrayList();
         
-        if (abscissa.equals(p_passedFunction.getAbscissa()))
+        //we add 0 at the end of the coefficient arrays to make them the same size 
+        while(passedCoef.size() < currentCoef.size())
         {
-            for (BigDecimal position: abscissa)
-            {
-                addedValues.put(position, formatBigDecimal(m_values.get(position).add(p_passedFunction.getFunction().get(position))));
-            }
+            passedCoef.add(BigDecimal.ZERO);
         }
-        else
+        while(currentCoef.size() < passedCoef.size())
         {
-            for (BigDecimal position: abscissa)
-            {
-                try
-                {
-                    addedValues.put(position, formatBigDecimal(m_values.get(position).add(p_passedFunction.getValueAtPosition(position))));
-                }
-                catch (NoSuchElementException ex)
-                {
-                    addedValues.put(position, m_values.get(position));
-                }
-            }
+            currentCoef.add(BigDecimal.ZERO);
         }
         
-        return new ContinuousFunction((HashMap) addedValues);
+        for(int i = 0 ; i < currentCoef.size() ; i += 1)
+        {
+            finalCoefs.add(currentCoef.get(i).add(passedCoef.get(i)));
+        }
+        
+        return new ContinuousFunction(finalCoefs, p_passedFunction.getMin().max(m_limits.get("min")), p_passedFunction.getMax().min(m_limits.get("max")));
     }
     
     public ContinuousFunction negate()
