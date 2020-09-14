@@ -40,7 +40,6 @@ import java.util.zip.DataFormatException;
  */
 public class ContinuousFunction
 {
-    //do not truncate values here: the field is also defined outside the absorber. Only the absorber knows if a particle exited itself. A ContinuousFunction can only say if a given position is in its range.
     protected final Map<BigDecimal, BigDecimal> m_values;
     protected final TreeSet<BigDecimal> m_abscissa;
     
@@ -58,12 +57,12 @@ public class ContinuousFunction
     
     public ContinuousFunction (HashMap<BigDecimal, BigDecimal> p_values)
     {
-        m_values = p_values;
+        m_values = new HashMap(p_values);
         m_abscissa = new TreeSet(m_values.keySet());
     }
     
     /**
-     * Create a continuous function from a file given by SCAPS-1D file
+     * Create a {@code ContinuousFunction} from a file given by SCAPS-1D file
      * @param p_inputFile the SCAPS file from which the values of the abscissa and the field need to be extracted
      * @param p_abscissaUnitMultiplier the multiplier to convert the abscissa to metres
      * @param p_valuesUnitMultiplier the multiplier to convert the field values to SI
@@ -119,6 +118,11 @@ public class ContinuousFunction
         return p_position.compareTo(m_abscissa.first()) >= 0 && p_position.compareTo(m_abscissa.last()) <= 0;
     }
     
+    /**
+     * The default {@code BigDecimal} formatting function for the ContinuousFunction. Called at the creation of a Function so number are consistent between them and they can be compared more easily.
+     * @param p_toBeFormatted
+     * @return the formatted BigDecimal
+     */
     protected BigDecimal formatBigDecimal(BigDecimal p_toBeFormatted)
     {
         return p_toBeFormatted.stripTrailingZeros();
@@ -156,20 +160,28 @@ public class ContinuousFunction
         return result;
     }
     
+    /**
+     * return a copy of the {@code ContinuousFunction} abscissa as a {@code TreeSet}
+     * @return {@code new TreeSet(abscissa)}
+     */
     public TreeSet<BigDecimal> getAbscissa()
     {
         return new TreeSet(m_abscissa);
     }
     
+    /**
+     * return a copy of the {@code HashMap} linking the abscissa to the values of the function
+     * @return {@code new HashMap(values)}
+     */
     public HashMap<BigDecimal, BigDecimal> getFunction()
     {
         return new HashMap(m_values);
     }
     
     /**
-     * Add two continuous function together
+     * add two {@code ContinuousFunction} together
      * @param p_passedFunction the function to be added.
-     * @return 
+     * @return {@code this} + {@code p_passedFunction}
      */
     public ContinuousFunction add(ContinuousFunction p_passedFunction)
     {
@@ -190,6 +202,10 @@ public class ContinuousFunction
         return new ContinuousFunction((HashMap) addedValues);
     }
     
+    /**
+     * return a new {@code ContinuousFunction} which associate at each abscissa -1 * the value of the Function at this abscissa
+     * @return {@code -this}
+     */
     public ContinuousFunction negate()
     {
         Map<BigDecimal, BigDecimal> negatedFunction = new HashMap<>();
@@ -202,11 +218,21 @@ public class ContinuousFunction
         return new ContinuousFunction((HashMap) negatedFunction);
     }
     
-    public ContinuousFunction substract(ContinuousFunction p_passedFunction)
+    /**
+     * subtract two {@code ContinuousFunction}
+     * @param p_passedFunction
+     * @return {@code this} - {@code p_passedFunction}
+     */
+    public ContinuousFunction subtract(ContinuousFunction p_passedFunction)
     {
         return this.add(p_passedFunction.negate());
     }
     
+    /**
+     * multiply two {@code ContinuousFunction} together
+     * @param p_passedFunction the function to multiply with the current one
+     * @return {@code this} * {@code p_passedFunction}
+     */
     public ContinuousFunction multiply(ContinuousFunction p_passedFunction)
     {
         Map<BigDecimal, BigDecimal> multilpliedValues = new HashMap<>();
@@ -226,6 +252,11 @@ public class ContinuousFunction
         return new ContinuousFunction((HashMap) multilpliedValues);
     }
     
+    /**
+     * multiply a {@code ContinuousFunction} with a {@code BigDecimal} by multiplying each values of the function by the passed {@code BigDecimal}
+     * @param p_multiplier the {@code BigDecimal} by which the function is to be multiplied
+     * @return {@code this} * {@code p_multiplier}
+     */
     public ContinuousFunction multiply(BigDecimal p_multiplier)
     {
         Map<BigDecimal, BigDecimal> multilpliedValues = new HashMap<>();
@@ -238,6 +269,11 @@ public class ContinuousFunction
         return new ContinuousFunction((HashMap) multilpliedValues);
     }
     
+    /**
+     * return a {@code ContinuousFunction} which values are the invert of {@code this} values
+     * @return 1/{@code this}
+     * @throws ArithmeticException 
+     */
     public ContinuousFunction invert() throws ArithmeticException
     {
         Map<BigDecimal, BigDecimal> invertedFunction = new HashMap<>();
@@ -250,16 +286,32 @@ public class ContinuousFunction
         return new ContinuousFunction((HashMap) invertedFunction);
     }
     
+    /**
+     * divide {@code this} by the passed {@code ContinuousFunction} by dividing each of its values by the value at the corresponding abscissa in the passed {@code ContinuousFunction}.
+     * @param p_passedFunction the dividing {@code ContinuousFunction}
+     * @return {@code this} / {@code p_passedFunction}
+     * @throws ArithmeticException 
+     */
     public ContinuousFunction divide(ContinuousFunction p_passedFunction) throws ArithmeticException
     {
         return this.multiply(p_passedFunction.invert());
     }
     
+    /**
+     * divide a {@code ContinuousFunction} by the passed {@code BigDecimal}, by dividing each of its value by it
+     * @param p_divider the {@code BigDecimal} by which dividing the {@code ContinuousFunction}
+     * @return {@code this} / {@code p_divider}
+     * @throws ArithmeticException 
+     */
     public ContinuousFunction divide(BigDecimal p_divider) throws ArithmeticException
     {
         return this.multiply(BigDecimal.ONE.divide(p_divider, MathContext.DECIMAL128));
     }
     
+    /**
+     * remove zeros from the {@code ContinuousFunction}, replacing them with {@code DOUBLE_MIN_VALUE} with a sign depending of the function environment.
+     * @return a new {@code ContinuousFunction} without zeros
+     */
     public ContinuousFunction avoidZeros()
     {
         Map<BigDecimal, BigDecimal> noZeroFunction = new HashMap();
@@ -338,8 +390,8 @@ public class ContinuousFunction
     /**
      * Give the value of the continuous function at the given position
      * If the position given is not in the abscissa list of the continuous function, the value is approximating by doing a linear approximation between the two closes points
-     * @param position
-     * @return 
+     * @param position the abscissa at which to find the value
+     * @return the value of the {@code ContinuousFunction} at this position, or its linear approximation
      */
     public BigDecimal getValueAtPosition(BigDecimal position)
     {
