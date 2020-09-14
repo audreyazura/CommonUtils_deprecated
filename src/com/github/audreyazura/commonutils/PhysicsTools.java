@@ -16,7 +16,7 @@
  *  You should have received a copy of the GNU General Public License
  *  along with CommonUtils.  If not, see <https://www.gnu.org/licenses/>.
  */
-package commonutils;
+package com.github.audreyazura.commonutils;
 
 import java.math.BigDecimal;
 
