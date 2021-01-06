@@ -67,6 +67,11 @@ public class PhysicsTools
             return m_textPrefix;
         }
         
+        public int getScale()
+        {
+            return m_multiplier.scale();
+        }
+        
         /**
          * Select the correct unit prefix for a given passed unit
          * @param p_unit the passed unit (e.g., nm, fs...)
