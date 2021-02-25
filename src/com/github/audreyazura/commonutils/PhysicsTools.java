@@ -41,12 +41,13 @@ public class PhysicsTools
      */
     static public enum UnitsPrefix
     {
-        FEMTO ("1e-12", "f"),  //[SI unit]/[FEMTO unit]
-        NANO ("1e-9", "n"),  //[SI unit]/[NANO unit]
-        MICRO ("1e-6", "μ"), //[SI unit]/[MICRO unit]
-        MILLI ("1e-3", "m"), //[SI unit]/[MILLI unit]
-        CENTI ("1e-2", "c"), //[SI unit]/[CENTI unit]
-        UNITY ("1.0", "");   //[SI unit]/[SI unit]
+        FEMTO ("1e-15", "f"),   //[SI unit]/[FEMTO unit]
+        PICO ("1e-12", "p"),    //[SI unit]/[PICO unit]
+        NANO ("1e-9", "n"),     //[SI unit]/[NANO unit]
+        MICRO ("1e-6", "μ"),    //[SI unit]/[MICRO unit]
+        MILLI ("1e-3", "m"),    //[SI unit]/[MILLI unit]
+        CENTI ("1e-2", "c"),    //[SI unit]/[CENTI unit]
+        UNITY ("1.0", "");      //[SI unit]/[SI unit]
         
         private final BigDecimal m_multiplier;
         private final String m_textPrefix;
