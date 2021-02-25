@@ -34,6 +34,10 @@ public class PhysicsTools
     static final public BigDecimal Q = new BigDecimal("1.60217733e-19");
     //definition of the electronVolt in J
     static final public BigDecimal EV = new BigDecimal("1.602176634e-19");
+    //speed of light in m/s
+    static final public BigDecimal c = new BigDecimal("299792458");
+    //Planck constant in J.s
+    static final public BigDecimal h = new BigDecimal("6.62607015e-34");
     
     /**
      * lists the different unit prefixes and their multiplier in SI
