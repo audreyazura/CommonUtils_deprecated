@@ -19,6 +19,7 @@
 package com.github.audreyazura.commonutils;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 
 /**
  * Contains different physical constants useful for calculations as well as a list of different unit order of magnitude names
@@ -26,6 +27,8 @@ import java.math.BigDecimal;
  */
 public class PhysicsTools
 {
+    //pi
+    static final public BigDecimal PI = new BigDecimal("3.1415926535");
     //Boltzman constant in J/K
     static final public BigDecimal KB = new BigDecimal("1.380649e-23");
     //electron mass in kg
@@ -38,6 +41,8 @@ public class PhysicsTools
     static final public BigDecimal c = new BigDecimal("299792458");
     //Planck constant in J.s
     static final public BigDecimal h = new BigDecimal("6.62607015e-34");
+    //Reduced Planck constant in J.s
+    static final public BigDecimal hbar = h.divide(PI.multiply(new BigDecimal("2")), MathContext.DECIMAL128);
     
     /**
      * lists the different unit prefixes and their multiplier in SI
@@ -115,16 +120,19 @@ public class PhysicsTools
     //effective masses are given has a multiplier of the electron mass
     static public enum Materials
     {
-        CIGS("0.089", "0.693"),
-        VACUUM("1", "1");
+        CIGS("0.089", "0.693", "1.1"),
+        INAS("0.023", "0.57", "0.354"),
+        VACUUM("1", "1", "0");
         
         private final BigDecimal m_electronEffectiveMass;
         private final BigDecimal m_holeEffectiveMass;
+        private final BigDecimal m_baseBandgap;
         
-        private Materials(String p_electronEffectiveMass, String p_holeEffectiveMass)
+        private Materials(String p_electronEffectiveMass, String p_holeEffectiveMass, String p_baseBandgap)
         {
             m_electronEffectiveMass = new BigDecimal(p_electronEffectiveMass);
             m_holeEffectiveMass = new BigDecimal(p_holeEffectiveMass);
+            m_baseBandgap = (new BigDecimal(p_baseBandgap));
         }
         
         public BigDecimal getElectronEffectiveMass()
@@ -132,9 +140,29 @@ public class PhysicsTools
             return m_electronEffectiveMass;
         }
         
+        public BigDecimal getElectronEffectiveMassSI()
+        {
+            return m_electronEffectiveMass.multiply(ME);
+        }
+        
         public BigDecimal getHoleEffectiveMass()
         {
             return m_holeEffectiveMass;
+        }
+        
+        public BigDecimal getHoleEffectiveMassSI()
+        {
+            return m_holeEffectiveMass.multiply(ME);
+        }
+        
+        public BigDecimal getBaseBandgap()
+        {
+            return m_baseBandgap;
+        }
+        
+        public BigDecimal getBaseBandgapSI()
+        {
+            return m_baseBandgap.multiply(EV);
         }
         
         static public Materials getMaterialFromString(String p_materialName)
