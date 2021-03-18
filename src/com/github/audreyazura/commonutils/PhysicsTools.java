@@ -122,6 +122,7 @@ public class PhysicsTools
     {
         CIGS("0.089", "0.693", "1.1"),
         INAS("0.023", "0.57", "0.354"),
+        GAAS("0.067", "0.57", "1.441"),
         VACUUM("1", "1", "0");
         
         private final BigDecimal m_electronEffectiveMass;
