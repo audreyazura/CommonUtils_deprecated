@@ -286,6 +286,11 @@ public class ContinuousFunction
         return this.multiply(BigDecimal.ONE.divide(p_divider, MathContext.DECIMAL128));
     }
     
+    public BigDecimal end()
+    {
+        return m_abscissa.last();
+    }
+    
     @Override
     public boolean equals(Object o)
     {
@@ -398,6 +403,36 @@ public class ContinuousFunction
         return new ContinuousFunction((HashMap) invertedFunction);
     }
     
+    public HashMap<String, BigDecimal> maximum()
+    {
+        if (m_abscissa.size() == 0)
+        {
+            throw new IllegalStateException("Function was not initialized.");
+        }
+        
+        Iterator<BigDecimal> abscissaIterator = m_abscissa.iterator();
+        BigDecimal currentAbscissa = abscissaIterator.next();
+        BigDecimal maxAbscissa = currentAbscissa;
+        BigDecimal maxValue = m_values.get(maxAbscissa);
+        
+        while (abscissaIterator.hasNext())
+        {
+            currentAbscissa = abscissaIterator.next();
+            
+            if (m_values.get(currentAbscissa).compareTo(maxValue) > 0)
+            {
+                maxAbscissa = currentAbscissa;
+                maxValue = m_values.get(currentAbscissa);
+            }
+        }
+        
+        HashMap<String, BigDecimal> result = new HashMap<>();
+        result.put("abscissa", maxAbscissa);
+        result.put("value", maxValue);
+        
+        return result;
+    }
+    
     /**
      * multiply two {@code ContinuousFunction} together
      * @param p_passedFunction the function to multiply with the current one
@@ -453,6 +488,11 @@ public class ContinuousFunction
         }
         
         return new ContinuousFunction((HashMap) negatedFunction);
+    }
+    
+    public BigDecimal start()
+    {
+        return m_abscissa.first();
     }
     
     /**
