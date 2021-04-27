@@ -323,6 +323,11 @@ public class ContinuousFunction
         return Objects.hash(m_values);
     }
     
+    public BigDecimal integrate() throws IndexOutOfBoundsException, IllegalArgumentException
+    {
+        return integrate(m_abscissa.first(), m_abscissa.last());
+    }
+    
     public BigDecimal integrate(BigDecimal p_lowerBound, BigDecimal p_upperBound) throws IndexOutOfBoundsException, IllegalArgumentException
     {
         if (p_lowerBound.compareTo(m_abscissa.last()) >= 0 || p_upperBound.compareTo(m_abscissa.first()) <= 0 || p_lowerBound.compareTo(m_abscissa.first()) < 0 || p_upperBound.compareTo(m_abscissa.last()) > 0)
