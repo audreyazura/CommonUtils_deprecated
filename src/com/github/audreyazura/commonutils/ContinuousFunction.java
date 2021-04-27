@@ -323,11 +323,25 @@ public class ContinuousFunction
         return Objects.hash(m_values);
     }
     
+    /**
+     * Integrate the function on its whole range
+     * @return The integration of the function
+     * @throws IndexOutOfBoundsException
+     * @throws IllegalArgumentException 
+     */
     public BigDecimal integrate() throws IndexOutOfBoundsException, IllegalArgumentException
     {
         return integrate(m_abscissa.first(), m_abscissa.last());
     }
     
+    /**
+     * Integrate the function on a given range
+     * @param p_lowerBound The lower abscissa of the integration
+     * @param p_upperBound The upper abscissa of the integration
+     * @return The value of the integral function on the given range
+     * @throws IndexOutOfBoundsException
+     * @throws IllegalArgumentException 
+     */
     public BigDecimal integrate(BigDecimal p_lowerBound, BigDecimal p_upperBound) throws IndexOutOfBoundsException, IllegalArgumentException
     {
         if (p_lowerBound.compareTo(m_abscissa.last()) >= 0 || p_upperBound.compareTo(m_abscissa.first()) <= 0 || p_lowerBound.compareTo(m_abscissa.first()) < 0 || p_upperBound.compareTo(m_abscissa.last()) > 0)
