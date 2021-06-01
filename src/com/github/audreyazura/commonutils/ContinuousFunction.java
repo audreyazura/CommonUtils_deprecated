@@ -33,7 +33,6 @@ import java.util.Objects;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 import java.util.zip.DataFormatException;
-import org.w3c.dom.ranges.RangeException;
 
 /**
  * Represents a continuous function as an ensemble of value associated with an abscissa
