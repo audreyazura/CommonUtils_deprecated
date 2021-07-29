@@ -52,14 +52,25 @@ public class ContinuousFunction
     
     public ContinuousFunction (ContinuousFunction p_passedFunction)
     {
-        m_values = p_passedFunction.getFunction();
-        m_abscissa = new TreeSet(m_values.keySet());
+        HashMap<BigDecimal, BigDecimal> valuesToCopy = p_passedFunction.getFunction();
+        m_values = new HashMap<>();
+        for (BigDecimal abscissa: valuesToCopy.keySet())
+        {
+            m_values.put(abscissa, valuesToCopy.get(abscissa));
+        }
+        
+        m_abscissa = new TreeSet<BigDecimal>(m_values.keySet());
     }
     
     public ContinuousFunction (HashMap<BigDecimal, BigDecimal> p_values)
     {
-        m_values = new HashMap(p_values);
-        m_abscissa = new TreeSet(m_values.keySet());
+        m_values = new HashMap<>();
+        for (BigDecimal abscissa: p_values.keySet())
+        {
+            m_values.put(abscissa, p_values.get(abscissa));
+        }
+        
+        m_abscissa = new TreeSet<BigDecimal>(m_values.keySet());
     }
     
     /**
@@ -68,6 +79,7 @@ public class ContinuousFunction
      * @param p_abscissaUnitMultiplier the multiplier to convert the abscissa to metres
      * @param p_valuesUnitMultiplier the multiplier to convert the field values to SI
      * @param p_expectedExtension the extension of the file from which the value need to be extracted
+     * @param p_separator the character string separating the two column in the file
      * @param p_ncolumn  the total number of column in the type of file given
      * @param p_columnToExtract the column to be taken, first number is the abscissa, second the value of the continuous function
      * @throws FileNotFoundException
@@ -145,7 +157,7 @@ public class ContinuousFunction
      * @param p_position
      * @return true if the position is between the two extrema
      */
-    private boolean isInRange(BigDecimal p_position)
+    public boolean isInRange(BigDecimal p_position)
     {
         return p_position.compareTo(m_abscissa.first()) >= 0 && p_position.compareTo(m_abscissa.last()) <= 0;
     }
@@ -181,7 +193,7 @@ public class ContinuousFunction
             }
         }
         
-        return new ContinuousFunction((HashMap) addedValues);
+        return new ContinuousFunction((HashMap<BigDecimal, BigDecimal>) addedValues);
     }
     
     /**
@@ -190,8 +202,8 @@ public class ContinuousFunction
      */
     public ContinuousFunction avoidZeros()
     {
-        Map<BigDecimal, BigDecimal> noZeroFunction = new HashMap();
-        List<BigDecimal> abscissa = new ArrayList(m_values.keySet());
+        Map<BigDecimal, BigDecimal> noZeroFunction = new HashMap<BigDecimal, BigDecimal>();
+        List<BigDecimal> abscissa = new ArrayList<BigDecimal>(m_values.keySet());
         BigDecimal next, previous, currentValue, currentAbscissa;                
         int lastIndex = abscissa.size()-1;
         
@@ -260,7 +272,7 @@ public class ContinuousFunction
             }
         }
         
-        return new ContinuousFunction((HashMap) noZeroFunction);
+        return new ContinuousFunction((HashMap<BigDecimal, BigDecimal>) noZeroFunction);
     }
     
     /**
@@ -309,7 +321,15 @@ public class ContinuousFunction
      */
     public TreeSet<BigDecimal> getAbscissa()
     {
-        return new TreeSet(m_abscissa);
+        return new TreeSet<BigDecimal>(m_abscissa);
+    }
+    
+    public BigDecimal getMeanIntervalSize()
+    {
+        BigDecimal functionSpan = (m_abscissa.last().subtract(m_abscissa.first())).abs();
+        BigDecimal numberOfInterval = new BigDecimal(m_abscissa.size());
+        
+        return functionSpan.divide(numberOfInterval, MathContext.DECIMAL128);
     }
     
     /**
@@ -318,7 +338,14 @@ public class ContinuousFunction
      */
     public HashMap<BigDecimal, BigDecimal> getFunction()
     {
-        return new HashMap(m_values);
+        HashMap<BigDecimal, BigDecimal> returnMap = new HashMap<>();
+        
+        for (BigDecimal key: m_abscissa)
+        {
+            returnMap.put(new BigDecimal(key.toString()), new BigDecimal(m_values.get(key).toString()));
+        }
+        
+        return returnMap;
     }
     
     @Override
@@ -399,12 +426,12 @@ public class ContinuousFunction
             invertedFunction.put(position, BigDecimal.ONE.divide(getValueAtPosition(position), MathContext.DECIMAL128));
         }
         
-        return new ContinuousFunction((HashMap) invertedFunction);
+        return new ContinuousFunction((HashMap<BigDecimal, BigDecimal>) invertedFunction);
     }
     
     public HashMap<String, BigDecimal> maximum()
     {
-        if (m_abscissa.size() == 0)
+        if (m_abscissa.isEmpty())
         {
             throw new IllegalStateException("Function was not initialized.");
         }
@@ -453,7 +480,7 @@ public class ContinuousFunction
             }
         }
         
-        return new ContinuousFunction((HashMap) multilpliedValues);
+        return new ContinuousFunction((HashMap<BigDecimal, BigDecimal>) multilpliedValues);
     }
     
     /**
@@ -470,7 +497,7 @@ public class ContinuousFunction
             multilpliedValues.put(position, formatBigDecimal(getValueAtPosition(position).multiply(p_multiplier)));
         }
         
-        return new ContinuousFunction((HashMap) multilpliedValues);
+        return new ContinuousFunction((HashMap<BigDecimal, BigDecimal>) multilpliedValues);
     }
     
     /**
@@ -486,7 +513,7 @@ public class ContinuousFunction
             negatedFunction.put(position, m_values.get(position).negate());
         }
         
-        return new ContinuousFunction((HashMap) negatedFunction);
+        return new ContinuousFunction((HashMap<BigDecimal, BigDecimal>) negatedFunction);
     }
     
     public BigDecimal start()
@@ -546,9 +573,9 @@ public class ContinuousFunction
         }
         else
         {
-            throw new NoSuchElementException("No field value for position:" + String.valueOf(position));
+            throw new IndexOutOfBoundsException("No field value for position:" + String.valueOf(position));
         }
 
-        return value;
+        return new BigDecimal(value.toString());
     }
 }
