@@ -96,6 +96,9 @@ public class PhysicsTools
                 case 'f':
                     prefixSelected = FEMTO;
                     break;
+                case 'p':
+                    prefixSelected = PICO;
+                    break;
                 case 'n':
                     prefixSelected = NANO;
                     break;
